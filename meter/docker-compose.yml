@@ -1,0 +1,6 @@
+version: "3.9"
+services:
+  meter:
+    build: .
+    volumes: 
+      - .:$WORK_DIR
