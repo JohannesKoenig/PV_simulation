@@ -13,12 +13,14 @@ from src.utils.datapoint import Datapoint
 def main():
     print("Starting meter service ...")
     load_dotenv()
-    RABBIT_MQ_HOST = os.environ.get("RABBIT_MQ_HOST")
+    RABBIT_MQ_HOST = os.environ.get("RABBIT_MQ_HOSTNAME")
     RABBIT_MQ_PORT = os.environ.get("RABBIT_MQ_PORT")
     RABBIT_MQ_KEY_WORD = os.environ.get("RABBIT_MQ_KEY_WORD")
+    RABBIT_MQ_USER = os.environ.get("RABBIT_MQ_USER")
+    RABBIT_MQ_PASSWORD = os.environ.get("RABBIT_MQ_PASSWORD")
 
     power_generator: PowerGenerator = PerlinNoisePowerGenerator()
-    outputs: List[OutputManager] = [CLIOutputManager(), RabbitMQOutputManager(RABBIT_MQ_HOST, RABBIT_MQ_PORT, RABBIT_MQ_KEY_WORD)]
+    outputs: List[OutputManager] = [CLIOutputManager(), RabbitMQOutputManager(RABBIT_MQ_HOST, RABBIT_MQ_PORT, RABBIT_MQ_KEY_WORD, RABBIT_MQ_USER, RABBIT_MQ_PASSWORD)]
     while(True):
         now = datetime.now()
         value = power_generator.get_value(now.timestamp())

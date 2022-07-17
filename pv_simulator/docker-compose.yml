@@ -1,11 +1,12 @@
 version: "3.9"
 services:
-  meter:
+  pv_simulator:
     build: .
     volumes: 
       - .:$WORK_DIR
     networks:
       - $PV_SIMULATION_NETWORK
+
 
 networks:
   pv_simulation:

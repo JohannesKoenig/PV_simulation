@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  meter:
+    build: meter
+    volumes: 
+      - .:$METER_WORK_DIR
+    networks:
+      - $PV_SIMULATION_NETWORK
+  pv_simulator:
+    build: pv_simulator
+    volumes: 
+      - .:$PV_SIMULATOR_WORK_DIR
+    networks:
+      - $PV_SIMULATION_NETWORK
+  pv_broker:
+    hostname: $RABBIT_MQ_HOSTNAME
+    image: rabbitmq:3-management
+    ports:
+      - $RABBIT_MQ_MANAGEMENT_PORT:15672
+      - $RABBIT_MQ_PORT:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=$RABBIT_MQ_USER
+      - RABBITMQ_DEFAULT_PASS=$RABBIT_MQ_PASSWORD
+    networks:
+      - $PV_SIMULATION_NETWORK
+
+networks:
+  pv_simulation:
+    driver: bridge
+    name: $PV_SIMULATION_NETWORK
