@@ -10,12 +10,4 @@ class InputManager(ABC):
         pass a callback function that should be called, when a new datapoint is received
         """
         pass
-
-    @abstractmethod
-    def start(self)-> None:
-        """
-        start listening
-        """
-        pass
-
     

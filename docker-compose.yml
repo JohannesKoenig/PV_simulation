@@ -4,13 +4,13 @@ services:
   meter:
     build: meter
     volumes: 
-      - .:$METER_WORK_DIR
+      - ./meter:$METER_WORK_DIR
     networks:
       - $PV_SIMULATION_NETWORK
   pv_simulator:
     build: pv_simulator
     volumes: 
-      - .:$PV_SIMULATOR_WORK_DIR
+      - ./pv_simulator:$PV_SIMULATOR_WORK_DIR
     networks:
       - $PV_SIMULATION_NETWORK
   pv_broker:

@@ -1,4 +1,8 @@
+import json
 from select import select
+from threading import Thread
+import time
+from dateutil import parser
 from typing import Callable
 from src.input.input_manager import InputManager
 from src.utils.datapoint import Datapoint
@@ -28,31 +32,41 @@ class RabbitMQInputManager(InputManager):
         self.connection = None
         self.channel = None
         self.callback = None
+
+        self.consumer_thread = Thread(target=self.__execution)
+        self.consumer_thread.start()
         
         
     def on_datapoint_input(self, callback: Callable[[Datapoint],None])-> None:
         self.callback = callback
         
-    
-    def start(self)-> None:
-        if self.connection == None:
-            try:
-                print(f"Attempting to connect to {self.host}:{self.port}")
-                credentials = PlainCredentials(self.user, self.password)
-                self.connection = BlockingConnection(ConnectionParameters(self.host, self.port, credentials=credentials))
-                self.channel = self.connection.channel()
-                self.channel.queue_declare(self.routing_key)
-            except AMQPConnectionError as e:
-                print(f"Failed connection to RabbitMQ, {self.host}:{self.port}")
-                print(e)
-                return
-        
+    def __execution(self) -> None:
+
         def rabbit_mq_callback(ch, method, properties, body):
-            print(f"Received {body}")
+            decoded = body.decode()
             if self.callback != None:
-                print("callback should be triggered")
-        
-        print(self.connection)
-        self.channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=rabbit_mq_callback)
-        print(f"Waiting for messages for queue {self.routing_key}...")
-        self.channel.start_consuming()
+                body_dict = json.loads(decoded)
+                datapoint = Datapoint(time=parser.parse(body_dict["time"]), power_value=body_dict["power_value"])
+                self.callback(datapoint)
+
+
+        while(True):
+            try:
+                if self.channel == None or self.channel.is_closed:
+                    self.__connect_to_broker()
+                    print("Established connection")
+                    self.channel.basic_consume(queue=self.routing_key, auto_ack=True, on_message_callback=rabbit_mq_callback)
+                    print(f"Waiting for messages for queue {self.routing_key}...")
+                    self.channel.start_consuming()
+
+            except AMQPConnectionError:
+                print(f"Failed connection to RabbitMQ, {self.host}:{self.port}")
+            except Exception as e:
+                print(e)
+            time.sleep(1)
+    
+    def __connect_to_broker(self) -> None:
+        credentials = PlainCredentials(self.user, self.password)
+        self.connection = BlockingConnection(ConnectionParameters(self.host, self.port, credentials=credentials))    
+        self.channel = self.connection.channel()
+        self.channel.queue_declare(self.routing_key)

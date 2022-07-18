@@ -1,6 +1,7 @@
 import os
 from typing import List
 from dotenv import load_dotenv
+from src.output.file_output_manager import FileOutputManager
 from src.output.cli_output_manager import CLIOutputManager
 from src.output.output_manager import OutputManager
 from src.utils.pv_datapoint import PVDatapoint
@@ -18,7 +19,7 @@ def main():
     RABBIT_MQ_PASSWORD = os.environ.get("RABBIT_MQ_PASSWORD")
 
     input: InputManager = RabbitMQInputManager(RABBIT_MQ_HOST, RABBIT_MQ_PORT, RABBIT_MQ_KEY_WORD, RABBIT_MQ_USER, RABBIT_MQ_PASSWORD)
-    outputs: List[OutputManager] = [CLIOutputManager()]
+    outputs: List[OutputManager] = [CLIOutputManager(), FileOutputManager()]
 
     def on_datapoint_received(datapoint: Datapoint) -> None:
         # Generate PV value
@@ -31,7 +32,6 @@ def main():
         pass
 
     input.on_datapoint_input(on_datapoint_received)
-    input.start()
 
 if __name__ == "__main__":
     main()

@@ -5,4 +5,4 @@ from src.utils.pv_datapoint import PVDatapoint
 class CLIOutputManager(OutputManager):
 
     def process(self, datapoint: PVDatapoint) -> None:
-        print(f'{datapoint.time.strftime("%m/%d/%Y, %H:%M:%S")}: {datapoint.power_value}, {datapoint.pv_power_value}')
+        print(f'Received {datapoint.time.strftime("%m/%d/%Y, %H:%M:%S")}: {datapoint.power_value}, {datapoint.pv_power_value}')
